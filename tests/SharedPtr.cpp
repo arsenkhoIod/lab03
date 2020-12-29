@@ -9,6 +9,7 @@ TEST(Construcors, EmptyConstructor) {
   EXPECT_EQ(Example.use_count(), 0);
   EXPECT_FALSE(Example);
 }
+
 TEST(Constructors, ConstructorForValue){
   int val = 20;
   SharedPtr<int> Example1(&val);
@@ -26,6 +27,7 @@ TEST(Constructors, ConstructorForValue){
   EXPECT_TRUE(Example1);
   EXPECT_TRUE(Example2);
 }
+
 TEST(Constructors, ConstructorForStruct){
   struct TestStruct{
     int val = 10;
@@ -44,6 +46,7 @@ TEST(Constructors, ConstructorForStruct){
   EXPECT_TRUE(Example1);
   EXPECT_TRUE(Example2);
 }
+
 TEST(Constructors, ConstructorForClass){
   class TestClass{
    public:
@@ -68,6 +71,7 @@ TEST(Constructors, ConstructorForClass){
   EXPECT_TRUE(Example1);
   EXPECT_TRUE(Example2);
 }
+
 TEST(Constructors, ConstructorForVectors){
   std::vector<int> Tested = {1, 55, 32};
   SharedPtr<std::vector<int>> Example1(&Tested);
@@ -85,6 +89,7 @@ TEST(Constructors, ConstructorForVectors){
   EXPECT_TRUE(Example2);
   EXPECT_FALSE(!Example1);
 }
+
 TEST(Methods,UseCountMethod){
   int val = 10;
   SharedPtr<int> Example1(&val);
@@ -103,11 +108,13 @@ TEST(Methods,UseCountMethod){
   }
   EXPECT_EQ(Example3.use_count(),3);
 }
+
 TEST(Methods,GetMethod){
   int val = 10;
   SharedPtr<int> Example1(&val);
   EXPECT_EQ(Example1.get(),&val);
 }
+
 TEST(Methods,SwapMethod){
   int val1 = 10;
   int val2 = 20;
@@ -134,6 +141,7 @@ TEST(Methods,SwapMethod){
   EXPECT_TRUE(Example2);
   EXPECT_TRUE(Example3);
 }
+
 TEST(Methods, VoidResetMethod){
   int val = 10;
   SharedPtr<int> ptr1(&val);
@@ -143,6 +151,7 @@ TEST(Methods, VoidResetMethod){
   EXPECT_EQ(ptr1.get(), nullptr);
   EXPECT_EQ(ptr1.use_count(), 0);
 }
+
 TEST(Methods, PtrResetMethod){
   int val = 10;
   SharedPtr<int> ptr1(&val);
@@ -153,6 +162,7 @@ TEST(Methods, PtrResetMethod){
   EXPECT_EQ(ptr1.get(), &val1);
   EXPECT_EQ(ptr1.use_count(), 1);
 }
+
 TEST(Operators, BoolOperator){
   int val = 10;
 
@@ -161,9 +171,12 @@ TEST(Operators, BoolOperator){
   EXPECT_TRUE(Example1);
   EXPECT_FALSE(Example2);
 }
+//!!!!!!!!тесты которые нужно было добавить!!!!
+
 struct NotAssignConstructible {
   NotAssignConstructible& operator= (NotAssignConstructible&&) = delete;
 };
+
 TEST(Constructors, NotAssignConstructible) {
   NotAssignConstructible* Object = new NotAssignConstructible;
   SharedPtr<NotAssignConstructible> ptr1(Object);
@@ -173,6 +186,7 @@ TEST(Constructors, NotAssignConstructible) {
                std::runtime_error);
   delete Object;
 }
+
 TEST(Operators, EquelOperator){
   NotAssignConstructible* Object = new NotAssignConstructible;
   SharedPtr<NotAssignConstructible> ptr1(Object);
@@ -184,6 +198,7 @@ TEST(Operators, EquelOperator){
                std::runtime_error);
   delete Object;
 }
+
 TEST(MoveTest, IsConstructAssignable){
   EXPECT_TRUE(std::is_move_assignable<int>::value);
   EXPECT_TRUE(std::is_move_constructible<int>::value);

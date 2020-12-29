@@ -33,6 +33,7 @@ class SharedPtr {
   explicit SharedPtr(T* ptr)
       :objectPtr(ptr),
        blockPtr(new ControlBlock<T>(ptr)){};
+
   SharedPtr(const SharedPtr& r){
     if (std::is_move_constructible<T>::value){
       objectPtr = r.objectPtr;
@@ -42,12 +43,11 @@ class SharedPtr {
       throw std::runtime_error("Type not move constructible");
     }
   };
-  SharedPtr(SharedPtr&& r){
+
+  SharedPtr(SharedPtr&& r):objectPtr(nullptr),blockPtr(nullptr){
     if(std::is_move_assignable<T>::value){
-      objectPtr = r.objectPtr;
-      blockPtr = r.blockPtr;
-      r.blockPtr = nullptr;
-      r.objectPtr = nullptr;
+      std::swap(objectPtr,r.objectPtr);
+      std::swap(blockPtr,r.blockPtr);
     }else{
       throw std::runtime_error("Type not move assignable");
     }
@@ -55,17 +55,17 @@ class SharedPtr {
   ~SharedPtr(){
     if (blockPtr!= nullptr) {
       blockPtr->SubPointer();
-      if(!blockPtr->GetCount())
+      if(blockPtr->GetCount() == 0)
         delete blockPtr;
     }
   };
+
   auto operator=(const SharedPtr& r) -> SharedPtr&{
     if(&r == this){
       std::cout << "Equal objects" << std::endl;
     }
     if(std::is_move_constructible<T>::value && &r != this){
-      blockPtr->SubPointer();
-      objectPtr = r.objectPtr;
+      reset();
       blockPtr = r.blockPtr;
       blockPtr->AddPointer();
     } else {
@@ -73,16 +73,15 @@ class SharedPtr {
     }
     return *this;
   };
+
   auto operator=(SharedPtr&& r) -> SharedPtr&{
     if(&r == this){
       std::cout << "Equal objects" << std::endl;
     }
     if(std::is_move_assignable<T>::value){
       reset();
-      objectPtr = r.objectPtr;
-      blockPtr = r.blockPtr;
-      r.blockPtr = nullptr;
-      r.objectPtr = nullptr;
+      std::swap(objectPtr,r.objectPtr);
+      std::swap(blockPtr,r.blockPtr);
     } else {
       throw std::runtime_error("Type not move assignable");
     }
@@ -92,23 +91,26 @@ class SharedPtr {
   operator bool() const{
     return (objectPtr != nullptr);
   };
+
   auto operator*() const -> T&{
     return *objectPtr;
   };
+
   auto operator->() const -> T*{
     return objectPtr;
   };
   auto get() -> T*{
     return objectPtr;
   };
+
   void reset(){
     objectPtr = nullptr;
     blockPtr -> SubPointer();
-    if (!blockPtr->GetCount())
+    if (blockPtr->GetCount() == 0)
       delete blockPtr;
     blockPtr = nullptr;
   };
-  void reset(T* ptr){
+  void reset(T*ptr){
     reset();
     objectPtr = ptr;
     blockPtr = new ControlBlock<T>(ptr);
@@ -118,6 +120,7 @@ class SharedPtr {
     std::swap(objectPtr, r.objectPtr);
     std::swap(blockPtr, r.blockPtr);
   };
+
   auto use_count() const -> std::size_t{
     if(objectPtr != nullptr){
       return blockPtr->GetCount();
